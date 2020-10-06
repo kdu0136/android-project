@@ -6,7 +6,7 @@ import androidx.viewbinding.ViewBinding
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
 
-abstract class BaseActivity<T: ViewBinding>: AppCompatActivity() {
+abstract class BaseActivity<T : ViewBinding> : AppCompatActivity() {
     protected lateinit var viewBinding: T
     protected val glideRequestManager: RequestManager by lazy { Glide.with(applicationContext) }
 

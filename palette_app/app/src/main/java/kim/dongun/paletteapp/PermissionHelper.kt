@@ -10,7 +10,10 @@ import androidx.core.app.ActivityCompat
  * 권한 확인 클래스
  */
 object PermissionHelper {
-    val galleryPermissions = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
+    val galleryPermissions = arrayOf(
+        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    )
 
     // permission request code
     const val REQUEST_GALLERY_CODE = 1
