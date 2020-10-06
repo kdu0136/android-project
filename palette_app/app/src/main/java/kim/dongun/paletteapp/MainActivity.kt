@@ -9,6 +9,8 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.provider.MediaStore
+import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import androidx.palette.graphics.Palette
@@ -18,7 +20,7 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import kim.dongun.paletteapp.databinding.ActivityMainBinding
 
-class MainActivity : BaseActivity<ActivityMainBinding>(), View.OnClickListener,
+class MainActivity : BaseActivity<ActivityMainBinding>(),
     View.OnTouchListener {
     private var bitmap: Bitmap? = null
         set(value) {
@@ -33,7 +35,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), View.OnClickListener,
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
 
-        viewBinding.imageSelectBtn.setOnClickListener(this)
         viewBinding.imageView.setOnTouchListener(this@MainActivity)
     }
 
@@ -46,7 +47,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), View.OnClickListener,
         when (requestCode) {
             PermissionHelper.REQUEST_GALLERY_CODE -> {
                 if (PermissionHelper.resultRequestPermissions(results = grantResults))
-                    viewBinding.imageSelectBtn.performClick()
+                    loadImage()
             }
         }
     }
@@ -55,7 +56,6 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), View.OnClickListener,
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK && requestCode == 101) {
-            viewBinding.imageSelectBtn.visibility = View.GONE
             glideRequestManager
                 .load(data?.data)
                 .listener(object : RequestListener<Drawable> {
@@ -81,26 +81,39 @@ class MainActivity : BaseActivity<ActivityMainBinding>(), View.OnClickListener,
         }
     }
 
-    override fun onClick(v: View?) {
-        v?.let {
-            when (v.id) {
-                R.id.imageSelectBtn -> {
-                    val hasGalleryPermission = PermissionHelper.hasPermission(
-                        context = this,
-                        permissions = PermissionHelper.galleryPermissions
-                    )
-                    if (!hasGalleryPermission) {
-                        PermissionHelper.requestGalleryPermissions(context = this)
-                        return
-                    }
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
 
-                    val intent = Intent()
-                    intent.type = MediaStore.Images.Media.CONTENT_TYPE
-                    intent.action = Intent.ACTION_GET_CONTENT
-                    startActivityForResult(intent, 101)
-                }
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.loadImageBtn -> {
+                loadImage()
+                true
             }
+            else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun loadImage() {
+        if (galleryPermissionCheck()) {
+            val intent = Intent()
+            intent.type = MediaStore.Images.Media.CONTENT_TYPE
+            intent.action = Intent.ACTION_GET_CONTENT
+            startActivityForResult(intent, 101)
+        }
+    }
+
+    private fun galleryPermissionCheck(): Boolean {
+        val hasGalleryPermission = PermissionHelper.hasPermission(
+            context = this,
+            permissions = PermissionHelper.galleryPermissions
+        )
+        return if (!hasGalleryPermission) {
+            PermissionHelper.requestGalleryPermissions(context = this)
+            false
+        } else true
     }
 
     @SuppressLint("ClickableViewAccessibility")
