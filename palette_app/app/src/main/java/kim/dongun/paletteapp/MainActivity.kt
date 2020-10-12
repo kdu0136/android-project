@@ -1,7 +1,6 @@
 package kim.dongun.paletteapp
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -19,13 +18,13 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import kim.dongun.paletteapp.databinding.ActivityMainBinding
+import java.util.*
 
-class MainActivity : BaseActivity<ActivityMainBinding>(),
-    View.OnTouchListener {
+class MainActivity : BaseActivity<ActivityMainBinding>(), View.OnTouchListener {
     private var bitmap: Bitmap? = null
         set(value) {
-            field = value
             value?.run {
+                field = value
                 setTextViewColor(bitmap = value)
             }
         }
@@ -55,7 +54,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (resultCode == Activity.RESULT_OK && requestCode == 101) {
+        if (resultCode == RESULT_OK && requestCode == 101) {
             glideRequestManager
                 .load(data?.data)
                 .listener(object : RequestListener<Drawable> {
@@ -122,15 +121,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
             when (v.id) {
                 R.id.imageView -> {
                     if (bitmap != null && (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_MOVE)) {
-//                        PrintLog.d("imageView", "touch (${event.x}, ${event.y})")
-//                        PrintLog.d("bitmap size", "w: ${bitmap!!.width}, h: ${bitmap!!.height}")
                         val pixel = bitmap!!.getPixel(event.x.toInt(), event.y.toInt())
 
                         val r = Color.red(pixel)
                         val g = Color.green(pixel)
                         val b = Color.blue(pixel)
 
-                        viewBinding.spoidColor.setBackgroundColor(Color.rgb(r, g, b))
+                        val color = Color.rgb(r, g, b)
+                        PrintLog.d(
+                            "RGB",
+                            String.format("%06x", (0xFFFFFF and color)).toUpperCase(Locale.ROOT)
+                        )
+
+                        viewBinding.spoidColor.setBackgroundColor(color)
                     }
                 }
             }
@@ -138,40 +141,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>(),
         return true
     }
 
-    // Generate palette synchronously and return it
     fun createPaletteSync(bitmap: Bitmap): Palette =
         Palette.from(bitmap).maximumColorCount(32).generate()
 
-    // Generate palette asynchronously and use it on a different
-    // thread using onGenerated()
-    fun createPaletteAsync(bitmap: Bitmap) {
-        Palette.from(bitmap).generate { palette ->
-            // Use generated instance
+    fun createPaletteAsync(bitmap: Bitmap, palette: (Palette) -> Unit) {
+        Palette.from(bitmap).maximumColorCount(32).generate {
+            if (it != null) palette(it)
         }
     }
 
-    // Set the background and text colors of a toolbar given a
-    // bitmap image to match
     fun setTextViewColor(bitmap: Bitmap) {
-        val palette = createPaletteSync(bitmap = bitmap)
-
-        palette.lightVibrantSwatch?.rgb?.run {
-            viewBinding.view1.setBackgroundColor(this)
-        }
-        palette.vibrantSwatch?.rgb?.run {
-            viewBinding.view2.setBackgroundColor(this)
-        }
-        palette.darkVibrantSwatch?.rgb?.run {
-            viewBinding.view3.setBackgroundColor(this)
-        }
-        palette.lightMutedSwatch?.rgb?.run {
-            viewBinding.view4.setBackgroundColor(this)
-        }
-        palette.mutedSwatch?.rgb?.run {
-            viewBinding.view5.setBackgroundColor(this)
-        }
-        palette.darkMutedSwatch?.rgb?.run {
-            viewBinding.view6.setBackgroundColor(this)
+        createPaletteAsync(bitmap = bitmap) { palette ->
+            palette.lightVibrantSwatch?.rgb?.run { viewBinding.view1.setBackgroundColor(this) }
+            palette.vibrantSwatch?.rgb?.run { viewBinding.view2.setBackgroundColor(this) }
+            palette.darkVibrantSwatch?.rgb?.run { viewBinding.view3.setBackgroundColor(this) }
+            palette.lightMutedSwatch?.rgb?.run { viewBinding.view4.setBackgroundColor(this) }
+            palette.mutedSwatch?.rgb?.run { viewBinding.view5.setBackgroundColor(this) }
+            palette.darkMutedSwatch?.rgb?.run { viewBinding.view6.setBackgroundColor(this) }
         }
     }
 } 
