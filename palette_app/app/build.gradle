@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -23,7 +24,7 @@ android {
         }
     }
 
-    viewBinding {
+    dataBinding {
         enabled = true
     }
 }
@@ -42,10 +43,26 @@ dependencies {
     // Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
+    // recyclerview
+    implementation "androidx.recyclerview:recyclerview:$rootProject.androidxRecyclerviewVersion"
+
     // Palette
     implementation "com.android.support:palette-v7:$rootProject.androidPaletteVersion"
 
     // Glide
     implementation "com.github.bumptech.glide:glide:$rootProject.glideVersion"
     annotationProcessor "com.github.bumptech.glide:compiler:$rootProject.glideVersion"
+
+    // Koin AndroidX Scope features
+    implementation "org.koin:koin-androidx-scope:$rootProject.koinVersion"
+    // Koin AndroidX ViewModel features
+    implementation "org.koin:koin-androidx-viewmodel:$rootProject.koinVersion"
+    // Koin AndroidX Fragment features
+    implementation "org.koin:koin-androidx-fragment:$rootProject.koinVersion"
+
+    // aac dependencies
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$rootProject.lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$rootProject.lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-extensions:$rootProject.lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$rootProject.lifecycleVersion"
 }

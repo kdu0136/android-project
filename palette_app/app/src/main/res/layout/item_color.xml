@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="color"
+            type="int" />
+    </data>
+
+    <View
+        android:layout_width="70dp"
+        android:layout_height="100dp"
+        bind:background="@{color}" />
+</layout>
